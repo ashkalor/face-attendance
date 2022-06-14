@@ -5,6 +5,8 @@ import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignupScreen";
 import { Colors } from "./constants/styles";
 import Dashboard from "./screens/Dashboard";
+import { useFonts, Poppins_400Regular } from "@expo-google-fonts/poppins";
+import LoadingOverlay from "./components/ui/LoadingOverlay";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,8 +20,8 @@ function AuthStack() {
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
     </Stack.Navigator>
   );
 }
@@ -47,6 +49,13 @@ function Navigation() {
 }
 
 export default function App() {
+  let [fontsLoaded] = useFonts({
+    "Poppins-Regular": Poppins_400Regular,
+  });
+
+  if (!fontsLoaded) {
+    return <LoadingOverlay />;
+  }
   return (
     <>
       <StatusBar style="light" />

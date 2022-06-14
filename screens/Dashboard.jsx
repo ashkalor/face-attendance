@@ -22,5 +22,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,
+    fontFamily: "Poppins-Regular",
   },
 });

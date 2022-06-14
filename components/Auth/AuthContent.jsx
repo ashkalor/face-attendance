@@ -9,7 +9,7 @@ function AuthContent({ isLogin, onAuthenticate }) {
   const [credentialsInvalid, setCredentialsInvalid] = useState({
     email: false,
     password: false,
-    confirmEmail: false,
+    name: false,
     confirmPassword: false,
   });
 
@@ -18,14 +18,15 @@ function AuthContent({ isLogin, onAuthenticate }) {
   }
 
   function submitHandler(credentials) {
-    let { email, confirmEmail, password, confirmPassword } = credentials;
+    let { email, name, password, confirmPassword } = credentials;
 
     email = email.trim();
     password = password.trim();
+    name = name.trim();
 
     const emailIsValid = email.includes("@");
     const passwordIsValid = password.length > 6;
-    const emailsAreEqual = email === confirmEmail;
+    const nameIsValid = name.length > 0;
     const passwordsAreEqual = password === confirmPassword;
 
     if (
@@ -36,7 +37,7 @@ function AuthContent({ isLogin, onAuthenticate }) {
       Alert.alert("Invalid input", "Please check your entered credentials.");
       setCredentialsInvalid({
         email: !emailIsValid,
-        confirmEmail: !emailIsValid || !emailsAreEqual,
+        name: !nameIsValid,
         password: !passwordIsValid,
         confirmPassword: !passwordIsValid || !passwordsAreEqual,
       });

@@ -20,8 +20,8 @@ function AuthStack() {
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Signup" component={SignupScreen} />
     </Stack.Navigator>
   );
 }
@@ -50,7 +50,7 @@ function Navigation() {
 
 export default function App() {
   let [fontsLoaded] = useFonts({
-    "Poppins-Regular": Poppins_400Regular,
+    "Poppins-Regular": require("./assets/fonts/Poppins-Regular.ttf"),
   });
 
   if (!fontsLoaded) {

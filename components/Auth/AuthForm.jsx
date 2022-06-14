@@ -99,7 +99,6 @@ export default AuthForm;
 
 const styles = StyleSheet.create({
   buttons: {
-    fontFamily: "Poppins-Regular",
     marginTop: 12,
   },
 });

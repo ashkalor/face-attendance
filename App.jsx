@@ -7,6 +7,7 @@ import { Colors } from "./constants/styles";
 import Dashboard from "./screens/Dashboard";
 import { useFonts, Poppins_400Regular } from "@expo-google-fonts/poppins";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
+import Toast from "react-native-toast-message";
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +62,7 @@ export default function App() {
       <StatusBar style="light" />
 
       <Navigation />
+      <Toast />
     </>
   );
 }

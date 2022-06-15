@@ -6,13 +6,13 @@ import Input from "./Input";
 
 function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
   const [enteredEmail, setEnteredEmail] = useState("");
-  const [enteredName, setEnteredName] = useState("");
+  const [enteredConfirmEmail, setEnteredConfirmEmail] = useState("");
   const [enteredPassword, setEnteredPassword] = useState("");
   const [enteredConfirmPassword, setEnteredConfirmPassword] = useState("");
 
   const {
     email: emailIsInvalid,
-    name: nameIsInvalid,
+    confirmEmail: emailsDontMatch,
     password: passwordIsInvalid,
     confirmPassword: passwordsDontMatch,
   } = credentialsInvalid;
@@ -22,8 +22,8 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
       case "email":
         setEnteredEmail(enteredValue);
         break;
-      case "name":
-        setEnteredName(enteredValue);
+      case "confirmEmail":
+        setEnteredConfirmEmail(enteredValue);
         break;
       case "password":
         setEnteredPassword(enteredValue);
@@ -37,7 +37,7 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
   function submitHandler() {
     onSubmit({
       email: enteredEmail,
-      name: enteredName,
+      confirmEmail: enteredConfirmEmail,
       password: enteredPassword,
       confirmPassword: enteredConfirmPassword,
     });
@@ -46,16 +46,6 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
   return (
     <View style={styles.form}>
       <View>
-        {!isLogin && (
-          <Input
-            label="Enter your full name"
-            onUpdateValue={updateInputValueHandler.bind(this, "name")}
-            value={enteredName}
-            keyboardType="default"
-            isInvalid={nameIsInvalid}
-            icon="person"
-          />
-        )}
         <Input
           label="Enter Email ID"
           onUpdateValue={updateInputValueHandler.bind(this, "email")}
@@ -64,6 +54,16 @@ function AuthForm({ isLogin, onSubmit, credentialsInvalid }) {
           isInvalid={emailIsInvalid}
           icon="mail"
         />
+        {!isLogin && (
+          <Input
+            label="Confirm Email Address"
+            onUpdateValue={updateInputValueHandler.bind(this, "confirmEmail")}
+            value={enteredConfirmEmail}
+            keyboardType="email-address"
+            isInvalid={emailsDontMatch}
+            icon="mail"
+          />
+        )}
         <Input
           label="Password"
           onUpdateValue={updateInputValueHandler.bind(this, "password")}

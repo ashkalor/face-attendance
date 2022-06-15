@@ -7,12 +7,14 @@ import { Colors } from "./constants/styles";
 import Dashboard from "./screens/Dashboard";
 import { useFonts } from "@expo-google-fonts/poppins";
 import Toast from "react-native-toast-message";
-import AuthContextProvider, { AuthContext } from "./store/auth-context";
-
+import { auth } from "./config/firebase";
 import { useCallback, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
 import LoadingOverlay from "./components/ui/LoadingOverlay";
+import UserContextProvider, { UserContext } from "./store/user-context";
+import IconButton from "./components/ui/IconButton";
+import { logout } from "./utils/auth";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +35,7 @@ function AuthStack() {
 }
 
 function AuthenticatedStack() {
+  const userCtx = useContext(UserContext);
   return (
     <Stack.Navigator
       screenOptions={{
@@ -41,18 +44,41 @@ function AuthenticatedStack() {
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Stack.Screen name="Dashboard" component={Dashboard} />
+      <Stack.Screen
+        name="Dashboard"
+        component={Dashboard}
+        options={{
+          headerRight: ({ tintColor }) => (
+            <IconButton
+              icon="exit-outline"
+              color={tintColor}
+              size={24}
+              onPress={async () => {
+                await logout();
+              }}
+            />
+          ),
+        }}
+      />
     </Stack.Navigator>
   );
 }
 
 function Navigation() {
-  const authCtx = useContext(AuthContext);
+  const userCtx = useContext(UserContext);
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        userCtx.addUser(user);
+      } else {
+        userCtx.removeUser();
+      }
+    });
+  }, []);
 
   return (
     <NavigationContainer>
-      {!authCtx.isAuthenticated && <AuthStack />}
-      {authCtx.isAuthenticated && <AuthenticatedStack />}
+      {!userCtx.isAuthenticated ? <AuthStack /> : <AuthenticatedStack />}
     </NavigationContainer>
   );
 }
@@ -60,15 +86,15 @@ function Navigation() {
 function Root() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
 
-  const authCtx = useContext(AuthContext);
+  const userCtx = useContext(UserContext);
 
   useEffect(() => {
     async function fetchToken() {
       await SplashScreen.preventAutoHideAsync();
-      const storedToken = await AsyncStorage.getItem("token");
+      const storedUser = await AsyncStorage.getItem("user");
 
-      if (storedToken) {
-        authCtx.authenticate(storedToken);
+      if (storedUser) {
+        userCtx.addUser(storedUser);
       }
 
       setIsTryingLogin(false);
@@ -98,9 +124,9 @@ export default function App() {
   return (
     <>
       <StatusBar style="light" />
-      <AuthContextProvider>
+      <UserContextProvider>
         <Root onLayout />
-      </AuthContextProvider>
+      </UserContextProvider>
       <Toast />
     </>
   );

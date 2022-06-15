@@ -12,7 +12,7 @@ function AuthContent({ isLogin, onAuthenticate }) {
   const [credentialsInvalid, setCredentialsInvalid] = useState({
     email: false,
     password: false,
-    name: false,
+    confirmEmail: false,
     confirmPassword: false,
   });
 
@@ -25,21 +25,19 @@ function AuthContent({ isLogin, onAuthenticate }) {
   }
 
   function submitHandler(credentials) {
-    let { email, name, password, confirmPassword } = credentials;
+    let { email, confirmEmail, password, confirmPassword } = credentials;
 
     email = email.trim();
     password = password.trim();
-    name = name.trim();
 
     const emailIsValid = email.includes("@");
     const passwordIsValid = password.length > 6;
-    const nameIsValid = name.length > 0;
+    const emailsAreEqual = email === confirmEmail;
     const passwordsAreEqual = password === confirmPassword;
-
     if (
       !emailIsValid ||
       !passwordIsValid ||
-      (!isLogin && (!nameIsValid || !passwordsAreEqual))
+      (!isLogin && (!emailsAreEqual || !passwordsAreEqual))
     ) {
       Toast.show({
         type: "error",
@@ -48,7 +46,7 @@ function AuthContent({ isLogin, onAuthenticate }) {
       });
       setCredentialsInvalid({
         email: !emailIsValid,
-        name: !nameIsValid,
+        confirmEmail: !emailIsValid || !emailsAreEqual,
         password: !passwordIsValid,
         confirmPassword: !passwordIsValid || !passwordsAreEqual,
       });

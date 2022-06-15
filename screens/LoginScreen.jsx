@@ -3,18 +3,16 @@ import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "../constants/styles";
 import { login } from "../utils/auth";
 import Toast from "react-native-toast-message";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
-import { AuthContext } from "../store/auth-context";
 
 const LoginScreen = () => {
-  const authCtx = useContext(AuthContext);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const loginHandler = async ({ email, password }) => {
     setIsAuthenticating(true);
     try {
-      const token = await login(email, password);
-      authCtx.authenticate(token);
+      await login(email, password);
+
       Toast.show({
         type: "success",
         text1: "Login Successful",

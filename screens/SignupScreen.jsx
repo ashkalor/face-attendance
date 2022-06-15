@@ -23,8 +23,8 @@ const SignupScreen = () => {
         text1: error.code,
         text2: error.message,
       });
+      setIsAuthenticating(false);
     }
-    setIsAuthenticating(false);
   };
   if (isAuthenticating) {
     return <LoadingOverlay message="Creating User" />;

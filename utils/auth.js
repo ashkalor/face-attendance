@@ -15,3 +15,7 @@ export const signup = async (email, password) => {
   const token = response?.user?.stsTokenManager?.accessToken;
   return token;
 };
+
+export const logout = async () => {
+  await auth.signOut();
+};

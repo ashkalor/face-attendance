@@ -7,34 +7,33 @@ import { Colors } from "../../constants/styles";
 import { useNavigation } from "@react-navigation/native";
 
 function AccountContent({ onAccountSetUp }) {
-  const navigation = useNavigation();
   const [accountDetailsInvalid, setAccountDetailsInvalid] = useState({
     name: false,
     employeeId: false,
   });
 
   function submitHandler(accountDetails) {
-    let { name, employeeId } = accountDetails;
+    let { name, employeeId, image } = accountDetails;
     name = name.trim();
     employeeId = employeeId.trim();
 
     const nameIsValid = name.length > 0;
     const employeeIdIsValid = employeeId.length > 0;
+    const imgIsValid = image !== null && image !== undefined;
 
-    if (!nameIsValid || !employeeIdIsValid) {
+    if (!nameIsValid || !employeeIdIsValid || !imgIsValid) {
       Toast.show({
         type: "error",
         text1: "Invalid input",
-        text2: "Please check your entered credentials.",
+        text2: "All fields must be filled",
       });
       setAccountDetailsInvalid({
         name: !nameIsValid,
-
         employeeId: !employeeIdIsValid,
       });
       return;
     }
-    onAccountSetUp({ name, employeeId });
+    onAccountSetUp({ name, employeeId, image });
   }
 
   return (
@@ -51,7 +50,7 @@ export default AccountContent;
 
 const styles = StyleSheet.create({
   accountContent: {
-    marginTop: 56,
+    marginTop: 36,
     marginHorizontal: 32,
     padding: 16,
     borderRadius: 8,

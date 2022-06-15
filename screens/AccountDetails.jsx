@@ -8,11 +8,12 @@ import { useState } from "react";
 import { CustomText as Text } from "../components/ui/CustomText";
 
 const AccountDetails = () => {
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const signUpHandler = async ({ email, password }) => {
-    setIsAuthenticating(true);
+  const [isSettingUp, setIsSettingUp] = useState(false);
+  const accountSetUpHandler = async ({ name, employeeId, image }) => {
+    setIsSettingUp(true);
     try {
-      await signup(email, password);
+      console.log(name, employeeId, image);
+
       Toast.show({
         type: "success",
         text1: "Signup Successful",
@@ -24,17 +25,17 @@ const AccountDetails = () => {
         text1: error.code,
         text2: error.message,
       });
-      setIsAuthenticating(false);
+      setIsSettingUp(false);
     }
   };
-  if (isAuthenticating) {
-    return <LoadingOverlay message="Creating User" />;
+  if (isSettingUp) {
+    return <LoadingOverlay message="Uploading User details!" />;
   }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Account Details</Text>
       <Text style={styles.subtitle}>Please enter few necessary details</Text>
-      <AccountContent onAccountSetUp={signUpHandler} />
+      <AccountContent onAccountSetUp={accountSetUpHandler} />
     </View>
   );
 };
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     fontFamily: "Poppins-Regular",
+    marginTop: 36,
   },
   subtitle: {
     marginTop: 8,

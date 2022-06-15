@@ -19,6 +19,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Attendance from "./screens/Attendance";
 import Logs from "./screens/Logs";
 import AccountDetails from "./screens/AccountDetails";
+import AppLoading from "./components/ui/AppLoading";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -185,7 +186,7 @@ export default function App() {
   });
 
   if (!fontsLoaded) {
-    return <LoadingOverlay />;
+    return <AppLoading />;
   }
 
   return (

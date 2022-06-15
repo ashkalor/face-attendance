@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     fontFamily: "Poppins-Regular",
+    marginTop: 36,
   },
   subtitle: {
     marginTop: 8,

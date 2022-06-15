@@ -32,11 +32,11 @@ export default Input;
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginVertical: 8,
+    marginVertical: 6,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 4,
+    borderRadius: 8,
     paddingHorizontal: 6,
     paddingVertical: 8,
   },

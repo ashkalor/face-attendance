@@ -19,7 +19,8 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   message: {
-    fontSize: 16,
+    fontSize: 24,
     marginBottom: 12,
+    fontFamily: "Poppins-Regular",
   },
 });

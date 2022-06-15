@@ -1,6 +1,8 @@
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import "firebase/compat/firestore";
+import { initializeApp, getApp, getApps } from "firebase/app";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { initializeAuth } from "firebase/auth";
+import { getReactNativePersistence } from "firebase/auth/react-native";
 import Constants from "expo-constants";
 
 const firebaseConfig = {
@@ -13,13 +15,12 @@ const firebaseConfig = {
   measurementId: Constants.manifest?.extra?.firebaseMeasurementId,
 };
 
-let app;
-if (firebase.apps.length === 0) {
-  app = firebase.initializeApp(firebaseConfig);
-} else {
-  app = firebase.app();
+let firebaseApp;
+if (!getApps().length) {
+  firebaseApp = initializeApp(firebaseConfig);
 }
+firebaseApp = getApp();
 
-const auth = firebase.auth();
-
-export { auth };
+export const auth = initializeAuth(firebaseApp, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});

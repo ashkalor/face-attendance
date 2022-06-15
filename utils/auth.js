@@ -1,13 +1,17 @@
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import { auth } from "../config/firebase";
 
 export const login = async (email, password) => {
-  const response = await auth.signInWithEmailAndPassword(email, password);
-  console.log(response);
-  return response;
+  const response = await signInWithEmailAndPassword(auth, email, password);
+  const token = response?.user?.stsTokenManager?.accessToken;
+  return token;
 };
 
 export const signup = async (email, password) => {
-  const response = await auth.createUserWithEmailAndPassword(email, password);
-  console.log(response);
-  return response;
+  const response = await createUserWithEmailAndPassword(auth, email, password);
+  const token = response?.user?.stsTokenManager?.accessToken;
+  return token;
 };

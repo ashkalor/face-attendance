@@ -5,9 +5,14 @@ import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignupScreen";
 import { Colors } from "./constants/styles";
 import Dashboard from "./screens/Dashboard";
-import { useFonts, Poppins_400Regular } from "@expo-google-fonts/poppins";
-import LoadingOverlay from "./components/ui/LoadingOverlay";
+import { useFonts } from "@expo-google-fonts/poppins";
 import Toast from "react-native-toast-message";
+import AuthContextProvider, { AuthContext } from "./store/auth-context";
+
+import { useCallback, useContext, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SplashScreen from "expo-splash-screen";
+import LoadingOverlay from "./components/ui/LoadingOverlay";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,11 +47,43 @@ function AuthenticatedStack() {
 }
 
 function Navigation() {
+  const authCtx = useContext(AuthContext);
+
   return (
     <NavigationContainer>
-      <AuthStack />
+      {!authCtx.isAuthenticated && <AuthStack />}
+      {authCtx.isAuthenticated && <AuthenticatedStack />}
     </NavigationContainer>
   );
+}
+
+function Root() {
+  const [isTryingLogin, setIsTryingLogin] = useState(true);
+
+  const authCtx = useContext(AuthContext);
+
+  useEffect(() => {
+    async function fetchToken() {
+      await SplashScreen.preventAutoHideAsync();
+      const storedToken = await AsyncStorage.getItem("token");
+
+      if (storedToken) {
+        authCtx.authenticate(storedToken);
+      }
+
+      setIsTryingLogin(false);
+    }
+
+    fetchToken();
+  }, []);
+
+  useCallback(async () => {
+    if (!isTryingLogin) {
+      await SplashScreen.hideAsync();
+    }
+  }, [isTryingLogin]);
+
+  return <Navigation />;
 }
 
 export default function App() {
@@ -57,11 +94,13 @@ export default function App() {
   if (!fontsLoaded) {
     return <LoadingOverlay />;
   }
+
   return (
     <>
       <StatusBar style="light" />
-
-      <Navigation />
+      <AuthContextProvider>
+        <Root onLayout />
+      </AuthContextProvider>
       <Toast />
     </>
   );

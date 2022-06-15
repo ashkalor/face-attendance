@@ -3,6 +3,15 @@ import "dotenv/config";
 export default {
   expo: {
     name: "face-attendance",
+    plugins: [
+      [
+        "expo-image-picker",
+        {
+          photosPermission:
+            "The app accesses your photos for face recognition.",
+        },
+      ],
+    ],
     slug: "face-attendance",
     version: "1.0.0",
     orientation: "portrait",

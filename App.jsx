@@ -15,8 +15,13 @@ import LoadingOverlay from "./components/ui/LoadingOverlay";
 import UserContextProvider, { UserContext } from "./store/user-context";
 import IconButton from "./components/ui/IconButton";
 import { logout } from "./utils/auth";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Attendance from "./screens/Attendance";
+import Logs from "./screens/Logs";
+import AccountDetails from "./screens/AccountDetails";
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function AuthStack() {
   return (
@@ -35,42 +40,87 @@ function AuthStack() {
 }
 
 function AuthenticatedStack() {
+  const signOutHandler = async () => {
+    try {
+      await logout();
+      Toast.show({
+        type: "success",
+        text1: "Logged out successfully",
+      });
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: err.code,
+        text2: err.message,
+      });
+    }
+  };
+  function Home() {
+    return (
+      <Tab.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: Colors.primary800 },
+          headerTintColor: "white",
+          contentStyle: { backgroundColor: "white" },
+        }}
+      >
+        <Tab.Screen
+          name="Dashboard"
+          component={Dashboard}
+          options={{
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                icon="exit-outline"
+                color={tintColor}
+                size={24}
+                onPress={signOutHandler}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Attendance"
+          component={Attendance}
+          options={{
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                icon="exit-outline"
+                color={tintColor}
+                size={24}
+                onPress={signOutHandler}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Logs"
+          component={Logs}
+          options={{
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                icon="exit-outline"
+                color={tintColor}
+                size={24}
+                onPress={signOutHandler}
+              />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    );
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{
+        headerShown: false,
         headerStyle: { backgroundColor: Colors.primary800 },
         headerTintColor: "white",
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Stack.Screen
-        name="Dashboard"
-        component={Dashboard}
-        options={{
-          headerRight: ({ tintColor }) => (
-            <IconButton
-              icon="exit-outline"
-              color={tintColor}
-              size={24}
-              onPress={async () => {
-                try {
-                  await logout();
-                  Toast.show({
-                    type: "success",
-                    text1: "Logged out successfully",
-                  });
-                } catch (err) {
-                  Toast.show({
-                    type: "error",
-                    text1: err.code,
-                    text2: err.message,
-                  });
-                }
-              }}
-            />
-          ),
-        }}
-      />
+      <Stack.Screen name="AccountDetails" component={AccountDetails} />
+      <Stack.Screen name="Home" component={Home} />
     </Stack.Navigator>
   );
 }

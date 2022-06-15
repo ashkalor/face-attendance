@@ -39,9 +39,13 @@ function AuthContent({ isLogin, onAuthenticate }) {
     if (
       !emailIsValid ||
       !passwordIsValid ||
-      (!isLogin && (!emailsAreEqual || !passwordsAreEqual))
+      (!isLogin && (!nameIsValid || !passwordsAreEqual))
     ) {
-      Alert.alert("Invalid input", "Please check your entered credentials.");
+      Toast.show({
+        type: "error",
+        text1: "Invalid input",
+        text2: "Please check your entered credentials.",
+      });
       setCredentialsInvalid({
         email: !emailIsValid,
         name: !nameIsValid,

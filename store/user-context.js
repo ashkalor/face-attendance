@@ -12,7 +12,12 @@ function UserContextProvider({ children }) {
   const [user, setUser] = useState();
 
   function addUser(user) {
-    setUser((prevUser) => ({ ...prevUser, ...user }));
+    setUser((prevUser) => {
+      if (!prevUser) {
+        prevUser = {};
+      }
+      return Object.assign(prevUser, user);
+    });
     AsyncStorage.setItem("user", JSON.stringify(user));
   }
 

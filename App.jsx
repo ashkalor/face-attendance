@@ -132,7 +132,7 @@ function Navigation() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         const transformedUser = {
-          uid: user.uid,
+          id: user.uid,
           name: user.displayName,
           email: user.email,
         };

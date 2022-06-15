@@ -35,7 +35,6 @@ function AuthStack() {
 }
 
 function AuthenticatedStack() {
-  const userCtx = useContext(UserContext);
   return (
     <Stack.Navigator
       screenOptions={{
@@ -54,7 +53,19 @@ function AuthenticatedStack() {
               color={tintColor}
               size={24}
               onPress={async () => {
-                await logout();
+                try {
+                  await logout();
+                  Toast.show({
+                    type: "success",
+                    text1: "Logged out successfully",
+                  });
+                } catch (err) {
+                  Toast.show({
+                    type: "error",
+                    text1: err.code,
+                    text2: err.message,
+                  });
+                }
               }}
             />
           ),
@@ -67,13 +78,20 @@ function AuthenticatedStack() {
 function Navigation() {
   const userCtx = useContext(UserContext);
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        userCtx.addUser(user);
+        const transformedUser = {
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+        };
+        userCtx.addUser(transformedUser);
       } else {
         userCtx.removeUser();
       }
     });
+
+    return unsubscribe;
   }, []);
 
   return (
@@ -92,9 +110,8 @@ function Root() {
     async function fetchToken() {
       await SplashScreen.preventAutoHideAsync();
       const storedUser = await AsyncStorage.getItem("user");
-
       if (storedUser) {
-        userCtx.addUser(storedUser);
+        userCtx.addUser(JSON.parse(storedUser));
       }
 
       setIsTryingLogin(false);

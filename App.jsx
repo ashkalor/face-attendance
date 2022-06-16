@@ -15,8 +15,14 @@ import LoadingOverlay from "./components/ui/LoadingOverlay";
 import UserContextProvider, { UserContext } from "./store/user-context";
 import IconButton from "./components/ui/IconButton";
 import { logout } from "./utils/auth";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Attendance from "./screens/Attendance";
+import Logs from "./screens/Logs";
+import AccountDetails from "./screens/AccountDetails";
+import AppLoading from "./components/ui/AppLoading";
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function AuthStack() {
   return (
@@ -35,31 +41,87 @@ function AuthStack() {
 }
 
 function AuthenticatedStack() {
-  const userCtx = useContext(UserContext);
+  const signOutHandler = async () => {
+    try {
+      await logout();
+      Toast.show({
+        type: "success",
+        text1: "Logged out successfully",
+      });
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: err.code,
+        text2: err.message,
+      });
+    }
+  };
+  function Home() {
+    return (
+      <Tab.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: Colors.primary800 },
+          headerTintColor: "white",
+          contentStyle: { backgroundColor: "white" },
+        }}
+      >
+        <Tab.Screen
+          name="Dashboard"
+          component={Dashboard}
+          options={{
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                icon="exit-outline"
+                color={tintColor}
+                size={24}
+                onPress={signOutHandler}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Attendance"
+          component={Attendance}
+          options={{
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                icon="exit-outline"
+                color={tintColor}
+                size={24}
+                onPress={signOutHandler}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Logs"
+          component={Logs}
+          options={{
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                icon="exit-outline"
+                color={tintColor}
+                size={24}
+                onPress={signOutHandler}
+              />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    );
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{
+        headerShown: false,
         headerStyle: { backgroundColor: Colors.primary800 },
         headerTintColor: "white",
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Stack.Screen
-        name="Dashboard"
-        component={Dashboard}
-        options={{
-          headerRight: ({ tintColor }) => (
-            <IconButton
-              icon="exit-outline"
-              color={tintColor}
-              size={24}
-              onPress={async () => {
-                await logout();
-              }}
-            />
-          ),
-        }}
-      />
+      <Stack.Screen name="AccountDetails" component={AccountDetails} />
+      <Stack.Screen name="Home" component={Home} />
     </Stack.Navigator>
   );
 }
@@ -67,13 +129,20 @@ function AuthenticatedStack() {
 function Navigation() {
   const userCtx = useContext(UserContext);
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        userCtx.addUser(user);
+        const transformedUser = {
+          id: user.uid,
+          name: user.displayName,
+          email: user.email,
+        };
+        userCtx.addUser(transformedUser);
       } else {
         userCtx.removeUser();
       }
     });
+
+    return unsubscribe;
   }, []);
 
   return (
@@ -92,9 +161,8 @@ function Root() {
     async function fetchToken() {
       await SplashScreen.preventAutoHideAsync();
       const storedUser = await AsyncStorage.getItem("user");
-
       if (storedUser) {
-        userCtx.addUser(storedUser);
+        userCtx.addUser(JSON.parse(storedUser));
       }
 
       setIsTryingLogin(false);
@@ -118,7 +186,7 @@ export default function App() {
   });
 
   if (!fontsLoaded) {
-    return <LoadingOverlay />;
+    return <AppLoading />;
   }
 
   return (

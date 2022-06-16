@@ -3,6 +3,15 @@ import "dotenv/config";
 export default {
   expo: {
     name: "face-attendance",
+    plugins: [
+      [
+        "expo-image-picker",
+        {
+          photosPermission:
+            "The app accesses your photos for face recognition.",
+        },
+      ],
+    ],
     slug: "face-attendance",
     version: "1.0.0",
     orientation: "portrait",
@@ -36,6 +45,7 @@ export default {
       firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.FIREBASE_APP_ID,
       firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
+      azureApiKey: process.env.AZURE_API_KEY,
     },
   },
 };

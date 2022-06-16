@@ -1,11 +1,4 @@
-import {
-  collection,
-  getDocs,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 
 export const addUserToDb = async (user) => {

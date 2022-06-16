@@ -35,7 +35,6 @@ export const detect = async (uri) => {
 
 export const createPersonGroup = async (name) => {
   try {
-    console.log(name);
     const response = await fetch(endpoint + `persongroups/${name}`, {
       method: "PUT",
       headers: {
@@ -70,7 +69,6 @@ export const getPersonGroup = async (name) => {
 };
 export const createPerson = async (user, groupId) => {
   try {
-    console.log(user, groupId);
     const response = await fetch(
       endpoint + `/persongroups/${groupId}/persons`,
       {

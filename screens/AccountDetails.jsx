@@ -13,6 +13,7 @@ import {
 } from "../utils/face";
 import { UserContext } from "../store/user-context";
 import { useNavigation } from "@react-navigation/native";
+import { addUserToDb, getUserFromDb } from "../utils/db";
 
 const AccountDetails = () => {
   const navigation = useNavigation();
@@ -22,43 +23,49 @@ const AccountDetails = () => {
     setIsSettingUp(true);
     try {
       const groupId = employeeId.substring(0, 7);
-      userCtx.addUser({
+      // const person = await createPerson(
+      //   userCtx.user,
+      //   employeeId.substring(0, 7)
+      // );
+
+      // const personId = person.personId;
+      const personId = "26ef1720-1dad-4263-afa3-1bfe006d277f";
+      // const result = await addFaceToPerson(
+      //   groupId,
+      //   personId,
+      //   image
+      // );
+      // console.log(result);
+
+      // await trainPersonGroup(groupId);
+
+      const results = await getPersonList(groupId);
+      console.log(results);
+
+      const user = {
+        id: userCtx.user.id,
+        email: userCtx.user.email,
         name,
         employeeId,
-        groupId: groupId,
-      });
-
-      const person = await createPerson(
-        userCtx.user,
-        employeeId.substring(0, 7)
-      );
-
-      const personId = person.personId;
-      userCtx.addUser({ personId });
-
-      const result = await addFaceToPerson(
-        userCtx.user.groupId,
+        groupId,
         personId,
-        image
-      );
-      console.log(result);
-
-      await trainPersonGroup(groupId);
-
-      const results = await getPersonList(employeeId.substring(0, 7));
-      console.log(results);
-      console.log(userCtx.user);
+      };
+      await addUserToDb(user);
+      userCtx.addUser(user);
 
       Toast.show({
         type: "success",
         text1: "Account setup successfully",
       });
-      navigation.navigate("Home");
+      setIsSettingUp(false);
+      navigation.replace("Home");
     } catch (error) {
-      console.log(error);
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
       Toast.show({
         type: "error",
-        text1: "Error setting up account",
+        text1: "Account setup failed",
+        text2: message,
       });
       setIsSettingUp(false);
     }

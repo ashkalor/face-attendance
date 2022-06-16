@@ -58,53 +58,13 @@ function Home() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: Colors.primary800 },
-        headerTintColor: "white",
+        headerShown: false,
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Tab.Screen
-        name="Dashboard"
-        component={Dashboard}
-        options={{
-          headerRight: ({ tintColor }) => (
-            <IconButton
-              icon="exit-outline"
-              color={tintColor}
-              size={24}
-              onPress={signOutHandler}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Attendance"
-        component={Attendance}
-        options={{
-          headerRight: ({ tintColor }) => (
-            <IconButton
-              icon="exit-outline"
-              color={tintColor}
-              size={24}
-              onPress={signOutHandler}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Logs"
-        component={Logs}
-        options={{
-          headerRight: ({ tintColor }) => (
-            <IconButton
-              icon="exit-outline"
-              color={tintColor}
-              size={24}
-              onPress={signOutHandler}
-            />
-          ),
-        }}
-      />
+      <Tab.Screen name="Dashboard" component={Dashboard} />
+      <Tab.Screen name="Attendance" component={Attendance} />
+      <Tab.Screen name="Logs" component={Logs} />
     </Tab.Navigator>
   );
 }

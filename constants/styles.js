@@ -9,4 +9,5 @@ export const Colors = {
   gray800: "#1f2937",
   error100: "#fecaca",
   error500: "#ef4444",
+  green400: "#4ade80",
 };

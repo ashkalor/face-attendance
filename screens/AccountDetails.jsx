@@ -76,10 +76,12 @@ const AccountDetails = () => {
         text1: "Logged out successfully",
       });
     } catch (err) {
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
       Toast.show({
         type: "error",
-        text1: err.code,
-        text2: err.message,
+        text1: "Logout failed",
+        text2: message,
       });
     }
   };
@@ -91,7 +93,7 @@ const AccountDetails = () => {
     <View style={styles.container}>
       <IconButton
         style={styles.iconButton}
-        icon="md-exit-outline"
+        icon="exit-outline"
         color={"black"}
         size={24}
         onPress={signOutHandler}

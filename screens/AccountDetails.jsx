@@ -14,6 +14,8 @@ import {
 import { UserContext } from "../store/user-context";
 import { useNavigation } from "@react-navigation/native";
 import { addUserToDb, getUserFromDb } from "../utils/db";
+import IconButton from "../components/ui/IconButton";
+import { logout } from "../utils/auth";
 
 const AccountDetails = () => {
   const navigation = useNavigation();
@@ -23,21 +25,16 @@ const AccountDetails = () => {
     setIsSettingUp(true);
     try {
       const groupId = employeeId.substring(0, 7);
-      // const person = await createPerson(
-      //   userCtx.user,
-      //   employeeId.substring(0, 7)
-      // );
+      const person = await createPerson(
+        userCtx.user,
+        employeeId.substring(0, 7)
+      );
 
-      // const personId = person.personId;
-      const personId = "26ef1720-1dad-4263-afa3-1bfe006d277f";
-      // const result = await addFaceToPerson(
-      //   groupId,
-      //   personId,
-      //   image
-      // );
-      // console.log(result);
+      const personId = person.personId;
+      const result = await addFaceToPerson(groupId, personId, image);
+      console.log(result);
 
-      // await trainPersonGroup(groupId);
+      await trainPersonGroup(groupId);
 
       const results = await getPersonList(groupId);
       console.log(results);
@@ -70,13 +67,37 @@ const AccountDetails = () => {
       setIsSettingUp(false);
     }
   };
+
+  const signOutHandler = async () => {
+    try {
+      await logout();
+      Toast.show({
+        type: "success",
+        text1: "Logged out successfully",
+      });
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: err.code,
+        text2: err.message,
+      });
+    }
+  };
+
   if (isSettingUp) {
     return <LoadingOverlay message="Uploading User details!" />;
   }
   return (
     <View style={styles.container}>
+      <IconButton
+        style={styles.iconButton}
+        icon="md-exit-outline"
+        color={"black"}
+        size={24}
+        onPress={signOutHandler}
+      />
       <Text style={styles.title}>Account Details</Text>
-      <Text style={styles.subtitle}>Please enter few necessary details</Text>
+      <Text style={styles.subtitle}>We need more information from you!</Text>
       <AccountContent onAccountSetUp={accountSetUpHandler} />
     </View>
   );
@@ -86,6 +107,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
+    position: "relative",
   },
   title: {
     fontSize: 36,
@@ -100,5 +122,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: Colors.gray500,
     fontFamily: "Poppins-Regular",
+  },
+  iconButton: {
+    position: "absolute",
+    right: 16,
+    top: 36,
   },
 });

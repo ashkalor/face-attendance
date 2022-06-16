@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import LoginScreen from "./screens/LoginScreen";
@@ -11,7 +11,6 @@ import { auth } from "./config/firebase";
 import { useCallback, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
-import LoadingOverlay from "./components/ui/LoadingOverlay";
 import UserContextProvider, { UserContext } from "./store/user-context";
 import IconButton from "./components/ui/IconButton";
 import { logout } from "./utils/auth";
@@ -20,6 +19,7 @@ import Attendance from "./screens/Attendance";
 import Logs from "./screens/Logs";
 import AccountDetails from "./screens/AccountDetails";
 import AppLoading from "./components/ui/AppLoading";
+import { getUserFromDb } from "./utils/db";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -39,8 +39,7 @@ function AuthStack() {
     </Stack.Navigator>
   );
 }
-
-function AuthenticatedStack() {
+function Home() {
   const signOutHandler = async () => {
     try {
       await logout();
@@ -56,61 +55,62 @@ function AuthenticatedStack() {
       });
     }
   };
-  function Home() {
-    return (
-      <Tab.Navigator
-        screenOptions={{
-          headerStyle: { backgroundColor: Colors.primary800 },
-          headerTintColor: "white",
-          contentStyle: { backgroundColor: "white" },
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: Colors.primary800 },
+        headerTintColor: "white",
+        contentStyle: { backgroundColor: "white" },
+      }}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={Dashboard}
+        options={{
+          headerRight: ({ tintColor }) => (
+            <IconButton
+              icon="exit-outline"
+              color={tintColor}
+              size={24}
+              onPress={signOutHandler}
+            />
+          ),
         }}
-      >
-        <Tab.Screen
-          name="Dashboard"
-          component={Dashboard}
-          options={{
-            headerRight: ({ tintColor }) => (
-              <IconButton
-                icon="exit-outline"
-                color={tintColor}
-                size={24}
-                onPress={signOutHandler}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Attendance"
-          component={Attendance}
-          options={{
-            headerRight: ({ tintColor }) => (
-              <IconButton
-                icon="exit-outline"
-                color={tintColor}
-                size={24}
-                onPress={signOutHandler}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Logs"
-          component={Logs}
-          options={{
-            headerRight: ({ tintColor }) => (
-              <IconButton
-                icon="exit-outline"
-                color={tintColor}
-                size={24}
-                onPress={signOutHandler}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    );
-  }
+      />
+      <Tab.Screen
+        name="Attendance"
+        component={Attendance}
+        options={{
+          headerRight: ({ tintColor }) => (
+            <IconButton
+              icon="exit-outline"
+              color={tintColor}
+              size={24}
+              onPress={signOutHandler}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Logs"
+        component={Logs}
+        options={{
+          headerRight: ({ tintColor }) => (
+            <IconButton
+              icon="exit-outline"
+              color={tintColor}
+              size={24}
+              onPress={signOutHandler}
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
+function AuthenticatedStack() {
+  const userCtx = useContext(UserContext);
   return (
     <Stack.Navigator
       screenOptions={{
@@ -120,8 +120,11 @@ function AuthenticatedStack() {
         contentStyle: { backgroundColor: "white" },
       }}
     >
-      <Stack.Screen name="AccountDetails" component={AccountDetails} />
-      <Stack.Screen name="Home" component={Home} />
+      {!userCtx.user.personId ? (
+        <Stack.Screen name="AccountDetails" component={AccountDetails} />
+      ) : (
+        <Stack.Screen name="Home" component={Home} />
+      )}
     </Stack.Navigator>
   );
 }
@@ -129,14 +132,19 @@ function AuthenticatedStack() {
 function Navigation() {
   const userCtx = useContext(UserContext);
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const transformedUser = {
-          id: user.uid,
-          name: user.displayName,
-          email: user.email,
-        };
-        userCtx.addUser(transformedUser);
+        const userFromDb = await getUserFromDb(user.uid);
+        if (userFromDb) {
+          userCtx.addUser(userFromDb);
+        } else {
+          const transformedUser = {
+            id: user.uid,
+            name: user.displayName,
+            email: user.email,
+          };
+          userCtx.addUser(transformedUser);
+        }
       } else {
         userCtx.removeUser();
       }
@@ -169,6 +177,8 @@ function Root() {
     }
 
     fetchToken();
+
+    return fetchToken;
   }, []);
 
   useCallback(async () => {

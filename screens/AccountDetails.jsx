@@ -8,6 +8,7 @@ import { CustomText as Text } from "../components/ui/CustomText";
 import {
   addFaceToPerson,
   createPerson,
+  deletePerson,
   getPersonList,
   trainPersonGroup,
 } from "../utils/face";
@@ -26,10 +27,11 @@ const AccountDetails = () => {
     try {
       const groupId = employeeId.substring(0, 7);
       const person = await createPerson(
-        userCtx.user,
+        userCtx.user.id,
+        name,
         employeeId.substring(0, 7)
       );
-
+      console.log(person);
       const personId = person.personId;
       const result = await addFaceToPerson(groupId, personId, image);
       console.log(result);
@@ -47,6 +49,7 @@ const AccountDetails = () => {
         groupId,
         personId,
       };
+
       await addUserToDb(user);
       userCtx.addUser(user);
 
@@ -55,8 +58,12 @@ const AccountDetails = () => {
         text1: "Account setup successfully",
       });
       setIsSettingUp(false);
-      navigation.replace("Home");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home" }],
+      });
     } catch (error) {
+      console.log(message);
       const message =
         error?.response?.data?.message || error.message || error.toString();
       Toast.show({

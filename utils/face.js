@@ -67,7 +67,7 @@ export const getPersonGroup = async (name) => {
     console.log(err);
   }
 };
-export const createPerson = async (user, groupId) => {
+export const createPerson = async (id, name, groupId) => {
   try {
     const response = await fetch(
       endpoint + `/persongroups/${groupId}/persons`,
@@ -78,8 +78,8 @@ export const createPerson = async (user, groupId) => {
           "Ocp-Apim-Subscription-Key": API_KEY,
         },
         body: JSON.stringify({
-          name: user.name,
-          userData: user.id,
+          name: name,
+          userData: id,
         }),
       }
     );
@@ -199,32 +199,37 @@ export const identifyFace = async (uri, groupId) => {
   }
 };
 
-// export const identifyFace = async (groupId, uri) => {
+export const verifyFace = async (uri, personId, groupId) => {
+  try {
+    const data = await detect(uri);
+    const faceId = data[0]?.faceId;
+    const response = await fetch(endpoint + `verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": API_KEY,
+      },
+      body: JSON.stringify({
+        faceId: faceId,
+        personId: personId,
+        personGroupId: groupId,
+      }),
+    });
+    return response.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// export const verifyFace = async (faceId, personId, groupId) => {
 //   try {
-//     const results = await detect(uri);
-//     console.log(results);
-//     const faceIds = results?.faceId;
-//     const response = await instance.post(`/identify`, {
+//     const response = await instance.post(`/verify`, {
+//       faceId: faceId,
+//       personId: personId,
 //       personGroupId: groupId,
-//       faceIds: faceIds,
-//       maxNumOfCandidatesReturned: 1,
-//       confidenceThreshold: 0.8,
 //     });
 //     return response.data;
 //   } catch (err) {
 //     console.log(err.toJSON());
 //   }
 // };
-
-export const verifyFace = async (faceId, personId, groupId) => {
-  try {
-    const response = await instance.post(`/verify`, {
-      faceId: faceId,
-      personId: personId,
-      personGroupId: groupId,
-    });
-    return response.data;
-  } catch (err) {
-    console.log(err.toJSON());
-  }
-};

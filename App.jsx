@@ -20,6 +20,8 @@ import Logs from "./screens/Logs";
 import AccountDetails from "./screens/AccountDetails";
 import AppLoading from "./components/ui/AppLoading";
 import { getUserFromDb } from "./utils/db";
+import FaceScanner from "./screens/FaceScanner";
+import { Ionicons } from "@expo/vector-icons";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -57,14 +59,42 @@ function Home() {
   };
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
+        tabBarBackgroundColor: Colors.primary500,
         headerShown: false,
         contentStyle: { backgroundColor: "white" },
-      }}
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "Dashboard") {
+            iconName = focused ? "list" : "list-outline";
+          } else if (route.name === "Attendance") {
+            iconName = focused ? "calendar" : "calendar-outline";
+          }
+
+          // You can return any component that you like here!
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
     >
       <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen name="Attendance" component={Attendance} />
-      <Tab.Screen name="Logs" component={Logs} />
+      <Tab.Screen
+        options={{
+          tabBarButton: () => null,
+          tabBarVisible: false,
+        }}
+        name="Logs"
+        component={Logs}
+      />
+      <Tab.Screen
+        name="FaceScanner"
+        component={FaceScanner}
+        options={{
+          tabBarButton: () => null,
+          tabBarVisible: false,
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -84,6 +114,11 @@ function AuthenticatedStack() {
         <Stack.Screen name="AccountDetails" component={AccountDetails} />
       ) : (
         <Stack.Screen name="Home" component={Home} />
+      )}
+      {!userCtx.user.personId ? (
+        <Stack.Screen name="Home" component={Home} />
+      ) : (
+        <Stack.Screen name="AccountDetails" component={AccountDetails} />
       )}
     </Stack.Navigator>
   );

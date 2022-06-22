@@ -1,5 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  Pressable,
+} from "react-native";
 import { CustomText } from "../components/ui/CustomText";
 import IconButton from "../components/ui/IconButton";
 import { Colors } from "../constants/styles";
@@ -12,25 +18,70 @@ import Button from "../components/ui/Button";
 import FlatButton from "../components/ui/FlatButton";
 import * as Location from "expo-location";
 import { distanceBtwCoordinates } from "../utils/location";
+import { useNavigation } from "@react-navigation/native";
+import { verifyFace } from "../utils/face";
+import { getAttendanceFromDb, updateAttendanceInDb } from "../utils/db";
+import moment from "moment";
 
-function Dashboard() {
+function Dashboard({ route }) {
   const userCtx = useContext(UserContext);
   const [isLogin, setIsLogin] = useState(true);
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("Invalid");
-  const [enterTime, setEnterTIme] = useState("--:--");
-  const [exitTime, setExitTIme] = useState("--:--");
+  const [enterTime, setEnterTime] = useState(null);
+  const [exitTime, setExitTime] = useState(null);
+  const [disabled, setDisabled] = useState(false);
+  const [lastDateAttended, setLastDateAttended] = useState(null);
 
-  const latitude1 = 13.075889849283014;
-  const longitude1 = 77.51727611226251;
+  const navigation = useNavigation();
+
+  const latitude1 = 13.07575399078763; // home
+  const longitude1 = 77.5173082990374;
+  // const latitude1 = 13.133488369244333; //bmsit
+  // const longitude1 = 77.56740898369354;
 
   useEffect(() => {
-    getGpsCoordinates();
-    return getGpsCoordinates;
-  }, []);
+    let logout = true;
+    if (logout) {
+      getGpsCoordinates();
+      setTimeHandler();
+    }
+
+    return () => (logout = false);
+  }, [route?.params]);
+
+  const resetDayHandler = async () => {
+    if (enterTime && exitTime) {
+      const date = moment(new Date()).format("YYYY-MM-DD");
+      const dailyReport = { date, enterTime, exitTime };
+      await updateAttendanceInDb(dailyReport, userCtx.user.id);
+      setLastDateAttended(date);
+      setEnterTime(null);
+      setExitTime(null);
+      return;
+    }
+  };
+
+  useEffect(() => {
+    resetDayHandler();
+
+    return resetDayHandler;
+  }, [enterTime, exitTime]);
+
+  const setTimeHandler = () => {
+    if (route.params?.isIdentical) {
+      setIsLogin((prevState) => !prevState);
+      if (route.params?.isLogin === "Login") {
+        setEnterTime(new Date().toLocaleTimeString("en-US"));
+      } else if (route.params?.isLogin === "Logout") {
+        setExitTime(new Date().toLocaleTimeString("en-US"));
+      }
+    }
+  };
 
   const signOutHandler = async () => {
     try {
+      console.log("signing out");
       await logout();
       Toast.show({
         type: "success",
@@ -47,10 +98,6 @@ function Dashboard() {
     }
   };
 
-  const locationStatusHandler = async () => {
-    await getGpsCoordinates();
-  };
-
   const getGpsCoordinates = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -58,7 +105,7 @@ function Dashboard() {
         throw new Error("Location permission not granted");
       }
       let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
+        accuracy: Location.Accuracy.BestForNavigation,
       });
       const latitude = location.coords.latitude;
       const longitude = location.coords.longitude;
@@ -87,15 +134,49 @@ function Dashboard() {
     }
   };
 
+  const logsHandler = async () => {
+    let lastDate;
+    const date = moment(new Date()).format("YYYY-MM-DD");
+    console.log(date);
+    try {
+      if (locationStatus !== "Valid") {
+        throw new Error("Please be atleast 100 meters from your organisation");
+      }
+
+      if (!lastDateAttended) {
+        const attendance = await getAttendanceFromDb(userCtx.user.id);
+        const lastArrayValue = attendance[attendance.length - 1];
+        lastDate = lastArrayValue.date;
+      } else {
+        lastDate = lastDateAttended;
+      }
+      if (lastDate == date) {
+        throw new Error("You have already marked attendance for today!");
+      } else {
+        navigation.navigate("FaceScanner", {
+          isLogin: isLogin,
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+      });
+    }
+  };
+
   return (
     <View style={styles.rootContainer}>
-      <IconButton
-        style={styles.iconButton}
-        icon="exit-outline"
-        color={"black"}
-        size={28}
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.pressed,
+          styles.iconButton,
+        ]}
         onPress={signOutHandler}
-      />
+      >
+        <Ionicons name="exit-outline" color="black" size={28} />
+      </Pressable>
       <Text style={styles.title}>{`Hi ${userCtx?.user?.name}!`}</Text>
       <CustomText style={styles.subHeading}>
         Welcome to Face-attendance
@@ -126,7 +207,7 @@ function Dashboard() {
             size={24}
           />
           <CustomText style={styles.cardTitle}>Location status :</CustomText>
-          <FlatButton style={styles.flatButton} onPress={locationStatusHandler}>
+          <FlatButton style={styles.flatButton} onPress={getGpsCoordinates}>
             <CustomText
               style={
                 locationStatus === "Valid"
@@ -134,7 +215,7 @@ function Dashboard() {
                   : styles.locationTextInValid
               }
             >
-              {location ? locationStatus : "Fetching location..."}
+              {location ? locationStatus : "Fetching location"}
             </CustomText>
           </FlatButton>
         </View>
@@ -146,7 +227,9 @@ function Dashboard() {
             size={24}
           />
           <CustomText style={styles.cardTitle}>Enter time :</CustomText>
-          <CustomText style={styles.cardText}>{enterTime}</CustomText>
+          <CustomText style={styles.cardText}>
+            {enterTime ? enterTime : "--:--"}
+          </CustomText>
         </View>
         <View style={styles.element}>
           <Ionicons
@@ -156,9 +239,13 @@ function Dashboard() {
             size={24}
           />
           <CustomText style={styles.cardTitle}>Exit time :</CustomText>
-          <CustomText style={styles.cardText}>{exitTime}</CustomText>
+          <CustomText style={styles.cardText}>
+            {exitTime ? exitTime : "--:--"}
+          </CustomText>
         </View>
-        <Button style={styles.button}>{isLogin ? "Log In" : "Log Out"}</Button>
+        <Button disabled={disabled} onPress={logsHandler} style={styles.button}>
+          {isLogin ? "Log In" : "Log Out"}
+        </Button>
       </View>
     </View>
   );
@@ -173,7 +260,7 @@ const styles = StyleSheet.create({
     marginTop: 56,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
     marginBottom: 8,
     fontFamily: "Poppins-Regular",

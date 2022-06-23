@@ -1,27 +1,16 @@
 import { useContext, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-  Pressable,
-} from "react-native";
+import { StyleSheet, Text, View, Pressable } from "react-native";
 import { CustomText } from "../components/ui/CustomText";
-import IconButton from "../components/ui/IconButton";
 import { Colors } from "../constants/styles";
 import { UserContext } from "../store/user-context";
 import Toast from "react-native-toast-message";
 import { logout } from "../utils/auth";
 import { Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Button from "../components/ui/Button";
-import FlatButton from "../components/ui/FlatButton";
-import * as Location from "expo-location";
-import { distanceBtwCoordinates } from "../utils/location";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { verifyFace } from "../utils/face";
-import { getAttendanceFromDb, updateAttendanceInDb } from "../utils/db";
-import { Calendar, CalendarList, Agenda } from "react-native-calendars";
+import { getAttendanceFromDb } from "../utils/db";
+import { Calendar } from "react-native-calendars";
 import LoadingOverlay from "../components/ui/LoadingOverlay";
 
 const Attendance = () => {
@@ -29,6 +18,7 @@ const Attendance = () => {
   const [markedDates, setMarkedDates] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   const getAttendance = async () => {
     const attendance = await getAttendanceFromDb(userCtx.user.id);
@@ -46,14 +36,13 @@ const Attendance = () => {
   };
 
   useEffect(() => {
-    let logout = true;
-    if (logout) {
+    if (isFocused) {
       setIsLoading(true);
       getAttendance();
       setIsLoading(false);
     }
-    return () => (logout = false);
-  }, []);
+    return getAttendance;
+  }, [isFocused]);
 
   const signOutHandler = async () => {
     try {
@@ -110,11 +99,10 @@ const Attendance = () => {
             monthTextColor: "#FFF",
             calendarBackground: Colors.primary800,
             dayTextColor: "#fff",
-            arrowColor: Colors.primary800,
+            arrowColor: "#fff",
             textDisabledColor: Colors.gray500,
           }}
           onDayPress={(e) => {
-            console.log(markedDates[e.dateString]);
             navigation.navigate("Logs", { date: markedDates[e.dateString] });
           }}
         />

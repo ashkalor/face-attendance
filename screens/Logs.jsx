@@ -67,7 +67,7 @@ const Logs = ({ navigation, route }) => {
           />
           <CustomText style={styles.cardTitle}>Login :</CustomText>
           <CustomText style={styles.cardText}>
-            {moment(route?.params?.date?.exitTime, "HH:mm:ss").format(
+            {moment(route?.params?.date?.enterTime, "HH:mm:ss").format(
               "HH:mm A"
             )}
           </CustomText>

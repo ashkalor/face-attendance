@@ -82,11 +82,11 @@ function Dashboard({ route }) {
   const signOutHandler = async () => {
     try {
       console.log("signing out");
-      await logout();
       Toast.show({
         type: "success",
         text1: "Logged out successfully",
       });
+      await logout();
     } catch (error) {
       const message =
         error?.response?.data?.message || error.message || error.toString();
@@ -145,8 +145,10 @@ function Dashboard({ route }) {
 
       if (!lastDateAttended) {
         const attendance = await getAttendanceFromDb(userCtx.user.id);
-        const lastArrayValue = attendance[attendance.length - 1];
-        lastDate = lastArrayValue.date;
+        if (attendance) {
+          const lastArrayValue = attendance[attendance.length - 1];
+          lastDate = lastArrayValue.date;
+        }
       } else {
         lastDate = lastDateAttended;
       }
@@ -158,6 +160,7 @@ function Dashboard({ route }) {
         });
       }
     } catch (error) {
+      console.log(error);
       Toast.show({
         type: "error",
         text1: error.message,

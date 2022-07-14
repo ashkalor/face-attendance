@@ -12,6 +12,7 @@ const SignupScreen = () => {
     setIsAuthenticating(true);
     try {
       await signup(email, password);
+      setIsAuthenticating(false);
       Toast.show({
         type: "success",
         text1: "Signup Successful",

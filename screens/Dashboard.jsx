@@ -63,9 +63,11 @@ function Dashboard({ route }) {
   };
 
   useEffect(() => {
-    resetDayHandler();
-
-    return resetDayHandler;
+    let logout = true;
+    if (logout) {
+      resetDayHandler();
+    }
+    return () => (logout = false);
   }, [enterTime, exitTime]);
 
   const setTimeHandler = () => {
@@ -105,7 +107,7 @@ function Dashboard({ route }) {
         throw new Error("Location permission not granted");
       }
       let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.BestForNavigation,
+        accuracy: Location.Accuracy.Highest,
       });
       const latitude = location.coords.latitude;
       const longitude = location.coords.longitude;
@@ -137,7 +139,6 @@ function Dashboard({ route }) {
   const logsHandler = async () => {
     let lastDate;
     const date = moment(new Date()).format("YYYY-MM-DD");
-    console.log(date);
     try {
       if (locationStatus !== "Valid") {
         throw new Error("Please be atleast 100 meters from your organisation");
@@ -160,7 +161,6 @@ function Dashboard({ route }) {
         });
       }
     } catch (error) {
-      console.log(error);
       Toast.show({
         type: "error",
         text1: error.message,

@@ -22,8 +22,9 @@ const FaceScanner = ({ route, navigation }) => {
       const granted = await ImagePicker.requestCameraPermissionsAsync();
       if (granted.status === "granted") {
         const response = await ImagePicker.launchCameraAsync({
-          quality: 1,
+          quality: 0.3,
         });
+        console.log(response);
         setImg(response.uri);
       } else {
         Toast.show({

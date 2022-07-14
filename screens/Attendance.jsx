@@ -36,12 +36,16 @@ const Attendance = () => {
   };
 
   useEffect(() => {
-    if (isFocused) {
-      setIsLoading(true);
-      getAttendance();
-      setIsLoading(false);
+    let logout = true;
+    if (logout) {
+      if (isFocused) {
+        setIsLoading(true);
+        getAttendance();
+        setIsLoading(false);
+      }
     }
-    return getAttendance;
+
+    return () => (logout = false);
   }, [isFocused]);
 
   const signOutHandler = async () => {
